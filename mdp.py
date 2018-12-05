@@ -94,7 +94,7 @@ class PokerMDP:
 			state.players[state.curPlayer][0] = False
 		else:
 			#Add players action to their running total bet
-			newPlayerBet = state.players[state.curPlayer] += action
+			newPlayerBet = state.players[state.curPlayer] + action
 			state.players[state.curPlayer] = newPlayerBet
 			#Total bet for the round is equal to the player's total running bet
 			state.curBet = newPlayerBet
@@ -115,7 +115,7 @@ class PokerMDP:
 		else:
 			state.curPlayer += 1
 			state.curPlayer %= self.numPlayers
-			
+
 		return state
 
 	#################################################################################

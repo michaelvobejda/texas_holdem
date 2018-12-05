@@ -1,12 +1,12 @@
-from deuces import Card
+# from deuces import Card
+from mdp import PokerMDP
 
 
 def run():
-    deck = d.Deck()
-    pile = deck.draw(3)
-    hand = deck.draw(2)
+    mdp = PokerMDP()
+    print(mdp)
+
     
-    print(f'hand: {hand}')
 
 
 
