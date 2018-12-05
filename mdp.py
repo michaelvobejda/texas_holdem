@@ -18,7 +18,7 @@ class PokerMDP:
 		if not playerHand:
 			return []
 
-		callVal = state.curBet - playerVet
+		callVal = state.curBet - playerBet
 		actions = range(call, call + self.maxRaise, 10)
 		actions.append(-1)
 
@@ -34,10 +34,11 @@ class PokerMDP:
 		folded = sum([1 if not player else 0 for player in state.players])
 		return len(state.board) == 5 or folded == self.numPlayers - 1
 
+
 	def getWinner(self, state):
 		results = [Evaluator.evaluate(player[0]) for player in state.curPlayer]
-
 		return results.index(max(results))
+
 
 	# Return reward for a given state
 	def getReward(self, state):
@@ -51,8 +52,12 @@ class PokerMDP:
 				return state.pot
 			else:
 				return 0
+
 		else:
-			return -1*playerBet
+			if roundIsOver(state):
+				return -1*playerBet
+			else:
+				return 0
 
 
 	#The round is over once all players have paid, which we know is true if the current player's bet is equal to the current bet
@@ -71,13 +76,13 @@ class PokerMDP:
 		#Initial round of betting
 		if l == 0:
 			return 0
-		# Flop
+		#Flop
 		if l == 3: 
 			return 1
-		# Turn
+		#Turn
 		if l == 4:
 			return 2
-		# River
+		#River
 		if l == 5:
 			return 3
 
@@ -85,22 +90,33 @@ class PokerMDP:
 	def sampleNextState(self, state, action):
 		#Update state based on action
 		if action == -1:
+			#Player folded, set their hand to False
 			state.players[state.curPlayer][0] = False
 		else:
-			state.curBet = action
-			state.pot += curBet
+			#Add players action to their running total bet
+			newPlayerBet = state.players[state.curPlayer] += action
+			state.players[state.curPlayer] = newPlayerBet
+			#Total bet for the round is equal to the player's total running bet
+			state.curBet = newPlayerBet
+			#Add the players bet to the pot
+			state.pot += action
 
 		if roundIsOver(state):
-			if  len(board) == 0:
-				board += self.deck.draw(3)
+			if len(state.board) == 0:
+				#Flop
+				state.board += self.deck.draw(3)
 			else:
-				board += self.deck.draw(1)
+				#Turn or River
+				state.board += self.deck.draw(1)
+			#Reset current bet for the round
 			state.curBet = 0
+			#Rotate starting bet
 			state.curPlayer = getStartingPlayer(state)
 		else:
-		
 			state.curPlayer += 1
 			state.curPlayer %= self.numPlayers
+			
+		return state
 
 	#################################################################################
 	#								INITIALIZE MDP 									#
@@ -124,4 +140,3 @@ class PokerMDP:
 		self.deck = Deck()
 		self.maxRaise = 51
 		#DECLARE GLOBAL VARIABLES (HYPERPARAMETERS) HERE!
-		self.state = self.initState()

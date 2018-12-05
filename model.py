@@ -1,9 +1,8 @@
-from deuces import Deck, Evaluator 
-
+from deuces import Card
 
 
 def run():
-    deck = Deck()
+    deck = d.Deck()
     pile = deck.draw(3)
     hand = deck.draw(2)
     
@@ -14,12 +13,8 @@ def run():
 # to do Q-Learning:
 # - states
 # - rewards
-# 
-# 
-# 
-
 
 
 
 if __name__ == "__main__":
-    run()
+    run() 
