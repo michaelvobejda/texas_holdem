@@ -66,7 +66,7 @@ class PokerMDP:
 
 		return playerBet == state.curBet
 
-	def getRoundNumber(state):
+	def getStartingPlayer(state):
 		l = len(state.board)
 		#Initial round of betting
 		if l == 0:
@@ -91,9 +91,12 @@ class PokerMDP:
 			state.pot += curBet
 
 		if roundIsOver(state):
-			board += self.deck.draw(1)
+			if  len(board) == 0:
+				board += self.deck.draw(3)
+			else:
+				board += self.deck.draw(1)
 			state.curBet = 0
-			state.curPlayer = getRoundNumber(state)
+			state.curPlayer = getStartingPlayer(state)
 		else:
 		
 			state.curPlayer += 1
