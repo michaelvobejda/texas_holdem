@@ -4,7 +4,7 @@
 import math, random, itertools
 from collections import defaultdict
 
-class EpidemicMDP:
+class PokerMDP:
 
 	#################################################################################
 	#								GET ACTIONS 									#
