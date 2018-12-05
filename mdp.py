@@ -14,11 +14,15 @@ class PokerMDP:
 	# Given a  state, returns all possible actions. 
 	def getActions(self, state):
 		playerHand, playerBet = state.players[state.curPlayer]
-		callVal = state.curBet - playerVet
-		RAISE = range(call, call + self.maxRaise, 10)
-		RAISE.append(-1)
 
-		return RAISE
+		if not playerHand:
+			return []
+
+		callVal = state.curBet - playerVet
+		actions = range(call, call + self.maxRaise, 10)
+		actions.append(-1)
+
+		return actions
 
 
 	#################################################################################
@@ -51,8 +55,49 @@ class PokerMDP:
 			return -1*playerBet
 
 
+	#The round is over once all players have paid, which we know is true if the current player's bet is equal to the current bet
+	def roundIsOver(state):
+		#Unpack player state
+		playerHand, playerBet = state.players[state.curPlayer]
+
+		#Check if current player has folded
+		if not playerHand:
+			return False
+
+		return playerBet == state.curBet
+
+	def getRoundNumber(state):
+		l = len(state.board)
+		#Initial round of betting
+		if l == 0:
+			return 0
+		# Flop
+		if l == 3: 
+			return 1
+		# Turn
+		if l == 4:
+			return 2
+		# River
+		if l == 5:
+			return 3
+
 	# Generates a next state probabilistically based on current state. 
 	def sampleNextState(self, state, action):
+		#Update state based on action
+		if action == -1:
+			state.players[state.curPlayer][0] = False
+		else:
+			state.curBet = action
+			state.pot += curBet
+
+		if roundIsOver(state):
+			board += self.deck.draw(1)
+			state.curBet = 0
+			state.curPlayer = getRoundNumber(state)
+		else:
+		
+			state.curPlayer += 1
+			state.curPlayer %= self.numPlayers
 
 	#################################################################################
 	#								INITIALIZE MDP 									#
@@ -66,7 +111,7 @@ class PokerMDP:
 		state['curBet'] = 0
 		state['curPlayer'] = 0
 		#player = (hand, curBet), hand=False if player has folded
-		state['players'] = [(self.deck.draw(2), 0) for _ in range(self.numPlayers)]
+		state['players'] = [(self.deck.draw(2), False) for _ in range(self.numPlayers)]
 
 		return state
 
