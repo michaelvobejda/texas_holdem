@@ -3,8 +3,9 @@
 
 from mdp import PokerMDP
 
-
 #### DECLARE GLOBAL VARIABLES HERE #################################
+
+max_iterations = 10
 
 
 #### Q-LEARNING HELPER FUNCTIONS #################################
@@ -37,6 +38,35 @@ def incorporateFeedback(state, action, reward, newState, actions, num_iterations
 #### SIMULATE (RUN Q-LEARNING) #####################################
 
 def simulateQLearning(number_of_trials): 
+	mdp = PokerMDP()
+	state = mdp.state
+	total_rewards = 0
+	num_iterations = 0
+	actions = mdp.getActions(state)
+	for i in range(max_iterations):
 
-	# avg_reward = total_rewards/float(num_iterations)
- 	# print(avg_reward)
+		#CASE: Game Over
+		if mdp.isEnd(state): 
+		    break 
+
+		# Choose action based on Q and epsilon-greedy search strategy. 
+        best_action = chooseAction(state, actions)
+        num_iterations += 1
+
+        # Observe newState and associated reward. 
+        newState, reward = mdp.sampleNextState(state, best_action)
+        total_rewards += reward
+
+        # Update Q weights 
+        actions = mdp.getActions(newState)
+        incorporateFeedback(state, best_action, reward, newState, actions, num_iterations, mdp.isEnd(newState))
+
+	avg_reward = total_rewards/float(num_iterations)
+ 	print(avg_reward)
+
+
+
+
+
+
+
