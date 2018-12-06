@@ -35,18 +35,28 @@ class PokerMDP:
 	# Checks to see if a state is a terminal state. 
 	def isEnd(self, state):
 		numFolded = sum([1 if not player[0] else 0 for player in state['players']])
-		return len(state['board']) == 6 or numFolded == self.numPlayers - 1
+		return len(state['board']) == self.boardLength or numFolded == self.numPlayers - 1
 
 
 	def getWinner(self, state):
-		results = [evaluator.evaluate(state['board'], player[0]) for player in state['players']]
-		return results.index(min(results))
+		best_rank = float("inf")
+		index_of_best = None
+		for i, player in enumerate(state['players']):
+			hand = player[0]
+			if (hand != False): 
+				rank = evaluator.evaluate(hand, state['board'])
+				if (rank < best_rank): 
+					best_rank = rank
+					index_of_best = i
+		return index_of_best
+		#results = [evaluator.evaluate(state['board'], player[0]) for player in state['players']]
+		#return results.index(min(results))
 
 
 	# Return reward for a given state
 	def getReward(self, state):
-		print('curPlayer:', state['curPlayer'])
-		print('len of players:', len(state['players']))
+		# print('curPlayer:', state['curPlayer'])
+		# print('len of players:', len(state['players']))
 		playerHand, playerBet = state['players'][state['curPlayer']]
 
 		if not playerHand:
@@ -102,7 +112,8 @@ class PokerMDP:
 			state['players'][state['curPlayer']] = (False, state['players'][state['curPlayer']][1])
 		else:
 			#Add players action to their running total bet
-			newPlayerBet = state['players'][state['curPlayer']][1] + action
+			if (state['players'][state['curPlayer']][1] == False): newPlayerBet = action   	#if current bet is False
+			else: newPlayerBet = state['players'][state['curPlayer']][1] + action
 			state['players'][state['curPlayer']] = (state['players'][state['curPlayer']][0], newPlayerBet)
 			#Total bet for the round is equal to the player's total running bet
 			state['curBet'] = newPlayerBet
@@ -147,5 +158,6 @@ class PokerMDP:
 		self.numPlayers = numPlayers
 		self.maxRaise = maxRaise + 1
 		self.deck = Deck()
+		self.boardLength = 5
 
 		#DECLARE GLOBAL VARIABLES (HYPERPARAMETERS) HERE!

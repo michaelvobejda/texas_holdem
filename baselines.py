@@ -7,17 +7,18 @@ import random
 agentQ = 0
 num_trials = 5
 
-callmdp = PokerMDP(numPlayers, maxRaise)
+callmdp = None
 
 
 #### GET_ACTIONS() METHODS #################################
 
 def getRandomAction(state, actions):
-	return random.choice(actions)
+	print(actions)
+	return [random.choice(actions)]
 
 def getMaxBetAction(state, actions):
 	actions = callmdp.getActions(state)
-	return max(actions)
+	return [max(actions)]
 
 #### SIMULATION METHOD #################################
 
@@ -28,7 +29,9 @@ def simulate(actionCommand, numPlayers, maxRaise, playerWallets, trial_num):
 	its = 0
 	while True:
 		
-		if mdp.isEnd(state): break
+		if mdp.isEnd(state): 
+			print(state)
+			break
 
 		curPlayer = state['curPlayer']
 
@@ -36,11 +39,13 @@ def simulate(actionCommand, numPlayers, maxRaise, playerWallets, trial_num):
 
 		# If player isn't agentQ, pick a random action. 
 		if curPlayer != agentQ:
-			action = getRandomAction(state, actions)
+			action = getRandomAction(state, actions)[0]
 			newState, reward = mdp.sampleNextState(state, action)
 			playerWallets[curPlayer] += reward
 			state = newState
-		# If player is agentQ, run standard find-action-that-maximizes-reward without lookahead. 
+
+		# If player is agentQ, run standard find-action-that-maximizes-reward without lookahead.
+		# Player takes action according to specified actionCommand (different for each baseline!) 
 		else: 
 			actions = actionCommand(state, actions)
 			max_reward = float("-inf")
@@ -63,20 +68,24 @@ def simulate(actionCommand, numPlayers, maxRaise, playerWallets, trial_num):
 
 #### CALL BASELINES #################################
 
-
 def runBaselines(numPlayers, maxRaise, playerWallets):
 
+	callmdp = PokerMDP(numPlayers, maxRaise)
+
 	# RANDOM ACTION POLICY
+	print("RANDOM ACTION POLICY")
 	for i in range(num_trials):
 		actionCommand = getRandomAction
 		simulate(actionCommand, numPlayers, maxRaise, playerWallets, i+1)
 
 	# MAX ACTION UNIFORM POLICY
+	print("MAX ACTION POLICY")
 	for i in range(num_trials):
 		actionCommand = getMaxBetAction
 		simulate(actionCommand, numPlayers, maxRaise, playerWallets, i+1)
 
-	# IMMEDIATE BEST ACTION POLICY 
+	# BEST ACTION WITHOUT LOOKAHEAD 
+	print("BEST ACTION WITHOUT LOOKAHEAD")
 	for i in range(num_trials):
 		actionCommand = callmdp.getActions
 		simulate(actionCommand, numPlayers, maxRaise, playerWallets, i+1)
