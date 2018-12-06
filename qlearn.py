@@ -21,8 +21,6 @@ def featureExtractor(state, action):
 	return (sorted(state.board + state.players[state.curPlayer][0]), action)
 
 
-
-
 #### Q-LEARNING MAIN FUNCTIONS #################################
 
 # Return the Q function associated with the weights and features
