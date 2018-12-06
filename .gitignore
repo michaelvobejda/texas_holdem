@@ -1,3 +1,5 @@
 mdp.pyc
 model.pyc
+baselines.pyc
+qlearn.pyc
 __pycache__
