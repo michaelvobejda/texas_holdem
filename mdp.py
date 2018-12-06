@@ -143,7 +143,7 @@ class PokerMDP:
 
 	def __init__(self, numPlayers, maxRaise):
 		self.numPlayers = numPlayers
-		self.deck = Deck()
 		self.maxRaise = maxRaise + 1
+		self.deck = Deck()
 
 		#DECLARE GLOBAL VARIABLES (HYPERPARAMETERS) HERE!
