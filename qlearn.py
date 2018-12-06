@@ -12,13 +12,14 @@ learning_rate = 0.8
 discount = 1
 weights = defaultdict(float)
 explorationProb = 0.15
+agentQ = 0
 
 
 #### Q-LEARNING HELPER FUNCTIONS #################################
 
 # Simplify board state to just consider board hands and player hand
 def featureExtractor(state, action):
-	return (sorted(state.board + state.players[state.curPlayer][0]), action)
+	return (tuple(sorted(state['board'] + state['players'][state['curPlayer']][0])), action)
 
 
 #### Q-LEARNING MAIN FUNCTIONS #################################
@@ -26,7 +27,7 @@ def featureExtractor(state, action):
 # Return the Q function associated with the weights and features
 def getQ(state, action):
 	key = featureExtractor(state, action)
-	return weights[keys]
+	return weights[key]
     
 # This algorithm will produce an action given a state 
 # by following some strategy. 
@@ -74,7 +75,7 @@ def simulateQLearning(numPlayers, maxRaise, playerWallets):
 		if mdp.isEnd(state): 
 		    break 
 
-		curPlayer = state.curPlayer
+		curPlayer = state['curPlayer']
 
 		# If player is agentQ, choose action based on Q and epsilon-greedy search strategy. 
 		if curPlayer == agentQ:
@@ -84,15 +85,15 @@ def simulateQLearning(numPlayers, maxRaise, playerWallets):
 			action = random.choice(actions) # TODO: write a better function
 
         # Observe newState and associated reward. 
-        newState, reward = mdp.sampleNextState(state, best_action)
-        playerWallets[curPlayer] += reward
+		newState, reward = mdp.sampleNextState(state, action)
+		playerWallets[curPlayer] += reward
 
 		# Get actions for new state
-        actions = mdp.getActions(newState)		
+		actions = mdp.getActions(newState)		
 
         # Update Q weights 
 		if curPlayer == agentQ:
-			incorporateFeedback(state, best_action, reward, newState, actions, mdp.isEnd(newState))
+			incorporateFeedback(state, action, reward, newState, actions, mdp.isEnd(newState))
 
 		# Update state		
 		state = newState
