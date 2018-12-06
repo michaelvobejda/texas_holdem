@@ -7,11 +7,17 @@ import random
 agentQ = 0
 num_trials = 5
 
+callmdp = PokerMDP(numPlayers, maxRaise)
+
 
 #### GET_ACTIONS() METHODS #################################
 
 def getRandomAction(state, actions):
 	return random.choice(actions)
+
+def getMaxBetAction(state, actions):
+	actions = callmdp.getActions(state)
+	return max(actions)
 
 #### SIMULATION METHOD #################################
 
@@ -59,16 +65,18 @@ def simulate(actionCommand, numPlayers, maxRaise, playerWallets, trial_num):
 
 
 def runBaselines(numPlayers, maxRaise, playerWallets):
-
+	
 	# RANDOM ACTION POLICY
 	for i in range(num_trials):
 		actionCommand = getRandomAction
 		simulate(actionCommand, numPlayers, maxRaise, playerWallets, i+1)
 
-	## IMPLEMENT OTHERS HERE ##
+	# MAX ACTION UNIFORM POLICY
+	for i in range(num_trials):
+		actionCommand = getMaxBetAction
+		simulate(actionCommand, numPlayers, maxRaise, playerWallets, i+1)
 
 	# IMMEDIATE BEST ACTION POLICY 
-	callmdp = PokerMDP(numPlayers, maxRaise)
 	for i in range(num_trials):
 		actionCommand = callmdp.getActions
 		simulate(actionCommand, numPlayers, maxRaise, playerWallets, i+1)
