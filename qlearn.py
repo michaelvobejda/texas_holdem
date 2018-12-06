@@ -37,7 +37,7 @@ def chooseAction(state, actions):
 	if random.random() < explorationProb:
 		return random.choice(actions)
 	else:
-		max_actions = []
+		max_actions = [-1]
 		max_q = float('-inf')
 		for a in actions:
 			q = getQ(state, a)
@@ -46,6 +46,7 @@ def chooseAction(state, actions):
 				max_actions = [a]
 			elif (q == max_q):
 				max_actions.append(a)
+		print('max actions:', max_actions)
 		return random.choice(max_actions)
 
 
