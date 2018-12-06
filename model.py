@@ -1,5 +1,5 @@
 from qlearn import simulateQLearning
-
+import baselines as bs
 
 # Global variables
 numRounds = 10
@@ -9,6 +9,11 @@ maxRaise = 50
 
 def runGame():
 	playerWallets = [1000 for _ in range(numPlayers)]
+ 	
+	#RUN BASELINES
+	bs.runBaselines(numPlayers, maxRaise, playerWallets)
+
+ 	#RUN Q-LEARNING
  	for _ in range(numRounds):
 		playerWallets = simulateQLearning(numPlayers, maxRaise, playerWallets)
 		print('Player wallets after round ' + i + ': ' + playerMoney + '.')
