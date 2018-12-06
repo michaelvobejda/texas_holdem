@@ -24,7 +24,7 @@ def simulate(actionCommand, numPlayers, maxRaise, playerWallets, trial_num):
 		
 		if mdp.isEnd(state): break
 
-		curPlayer = state.curPlayer
+		curPlayer = state['curPlayer']
 
 		actions = mdp.getActions(state)
 

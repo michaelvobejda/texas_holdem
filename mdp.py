@@ -3,7 +3,7 @@
 
 import math, random, itertools
 from collections import defaultdict
-from treys import Deck, Evaluator
+from deuces import Deck, Evaluator
 
 evaluator = Evaluator()
 
