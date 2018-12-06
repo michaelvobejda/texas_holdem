@@ -5,7 +5,7 @@ from mdp import PokerMDP
 
 #### DECLARE GLOBAL VARIABLES HERE #################################
 
-max_iterations = 10
+max_iterations = 50
 learning_rate = 0.8
 discount = 1
 
@@ -24,6 +24,11 @@ def getStepSize(num_iterations):
 
 # Return the Q function associated with the weights and features
 def getQ(state, action):
+	score = 0
+    for f, v in featureExtractor(state, action):
+        score += weights[f] * v
+    #if (score != 0): print("SCORE: ", score)
+    return score
     
 # This algorithm will produce an action given a state 
 # by following some strategy. 
@@ -65,7 +70,6 @@ def simulateQLearning(number_of_trials):
 
 	avg_reward = total_rewards/float(num_iterations)
  	print(avg_reward)
-
 
 
 
