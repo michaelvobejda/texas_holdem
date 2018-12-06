@@ -3,7 +3,7 @@
 
 import math, random, itertools
 from collections import defaultdict
-from deuces import Deck, Evaluator
+from treys import Deck, Evaluator
 
 evaluator = Evaluator()
 
@@ -16,13 +16,14 @@ class PokerMDP:
 
 	# Given a  state, returns all possible actions. 
 	def getActions(self, state):
-		playerHand, playerBet = state.players[state.curPlayer]
+		print('state:', state)
+		playerHand, playerBet = state['players'][state['curPlayer']]
 
 		if not playerHand:
 			return []
 
-		callVal = state.curBet - playerBet
-		actions = range(call, call + self.maxRaise, 10)
+		callVal = state['curBet'] - playerBet
+		actions = [a for a in range(callVal, callVal + self.maxRaise, 10)]
 		actions.append(-1)
 
 		return actions
@@ -34,25 +35,25 @@ class PokerMDP:
 
 	# Checks to see if a state is a terminal state. 
 	def isEnd(self, state):
-		numFolded = sum([1 if not player[0] else 0 for player in state.players])
-		return len(state.board) == 6 or numFolded == self.numPlayers - 1
+		numFolded = sum([1 if not player[0] else 0 for player in state['players']])
+		return len(state['board']) == 6 or numFolded == self.numPlayers - 1
 
 
 	def getWinner(self, state):
-		results = [evaluator.evaluate(self.board, player[0]) for player in state.players]
+		results = [evaluator.evaluate(self.board, player[0]) for player in state['players']]
 		return results.index(min(results))
 
 
 	# Return reward for a given state
 	def getReward(self, state):
-		playerHand, playerBet = state.players[state.curPlayer]
+		playerHand, playerBet = state['players'][state['curPlayer']]
 
 		if not playerHand:
 			return 0
 		if isEnd(state):
 			winner = getWinner(state)
-			if state.curPlayer == winner:
-				return state.pot
+			if state['curPlayer'] == winner:
+				return state['pot']
 			else:
 				return 0
 
@@ -66,16 +67,16 @@ class PokerMDP:
 	#The round is over once all players have paid, which we know is true if the current player's bet is equal to the current bet
 	def roundIsOver(state):
 		#Unpack player state
-		playerHand, playerBet = state.players[state.curPlayer]
+		playerHand, playerBet = state['players'][state['curPlayer']]
 
 		#Check if current player has folded
 		if not playerHand:
 			return False
 
-		return playerBet == state.curBet
+		return playerBet == state['curBet']
 
 	def getStartingPlayer(state):
-		l = len(state.board)
+		l = len(state['board'])
 		#Initial round of betting
 		if l == 0:
 			return 0
@@ -97,30 +98,30 @@ class PokerMDP:
 		#Update state based on action
 		if action == -1:
 			#Player folded, set their hand to False
-			state.players[state.curPlayer][0] = False
+			state['players'][state['curPlayer']][0] = False
 		else:
 			#Add players action to their running total bet
-			newPlayerBet = state.players[state.curPlayer] + action
-			state.players[state.curPlayer][1] = newPlayerBet
+			newPlayerBet = state['players'][state['curPlayer']][1] + action
+			state['players'][state['curPlayer']][1] = newPlayerBet
 			#Total bet for the round is equal to the player's total running bet
-			state.curBet = newPlayerBet
+			state['curBet'] = newPlayerBet
 			#Add the players bet to the pot
-			state.pot += action
+			state['pot'] += action
 
 		if roundIsOver(state):
-			if len(state.board) == 0:
+			if len(state['board']) == 0:
 				#Flop
-				state.board += self.deck.draw(3)
+				state['board'] += self.deck.draw(3)
 			else:
 				#Turn or River or End of round
-				state.board += self.deck.draw(1)
+				state['board'] += self.deck.draw(1)
 			#Reset current bet for the round
-			state.curBet = 0
+			state['curBet'] = 0
 			#Rotate starting bet
-			state.curPlayer = getStartingPlayer(state)
+			state['curPlayer'] = getStartingPlayer(state)
 		else:
-			state.curPlayer += 1
-			state.curPlayer %= self.numPlayers
+			state['curPlayer'] += 1
+			state['curPlayer'] %= self.numPlayers
 
 		return state, getReward(state)
 
@@ -137,7 +138,7 @@ class PokerMDP:
 		state['curPlayer'] = 0
 		#player = (hand, curBet), hand=False if player has folded
 		state['players'] = [(self.deck.draw(2), False) for _ in range(self.numPlayers)]
-
+		
 		return state
 
 

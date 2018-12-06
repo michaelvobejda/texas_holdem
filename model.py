@@ -9,7 +9,7 @@ maxRaise = 50
 
 def runGame():
 	playerWallets = [1000 for _ in range(numPlayers)]
- 	for _ in range(numRounds):
+	for _ in range(numRounds):
 		playerWallets = simulateQLearning(numPlayers, maxRaise, playerWallets)
 		print('Player wallets after round ' + i + ': ' + playerMoney + '.')
 
