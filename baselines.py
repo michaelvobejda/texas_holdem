@@ -2,6 +2,7 @@
 #########################################################
 
 from mdp import PokerMDP
+import random 
 
 agentQ = 0
 num_trials = 5
@@ -9,7 +10,8 @@ num_trials = 5
 
 #### GET_ACTIONS() METHODS #################################
 
-def getRandomAction()
+def getRandomAction(state, actions):
+	return random.choice(actions)
 
 #### SIMULATION METHOD #################################
 
@@ -58,7 +60,20 @@ def simulate(actionCommand, numPlayers, maxRaise, playerWallets, trial_num):
 
 def runBaselines(numPlayers, maxRaise, playerWallets):
 
-	for i in range()
+	# RANDOM ACTION POLICY
+	for i in range(num_trials):
+		actionCommand = getRandomAction
+		simulate(actionCommand, numPlayers, maxRaise, playerWallets, i+1)
+
+	## IMPLEMENT OTHERS HERE ##
+
+	# IMMEDIATE BEST ACTION POLICY 
+	callmdp = PokerMDP(numPlayers, maxRaise)
+	for i in range(num_trials):
+		actionCommand = callmdp.getActions
+		simulate(actionCommand, numPlayers, maxRaise, playerWallets, i+1)
+
+
 
 
 
