@@ -5,6 +5,9 @@ import math, random, itertools
 from collections import defaultdict
 from deuces import Deck, Evaluator
 
+evaluator = Evaluator()
+
+
 class PokerMDP:
 
 	#################################################################################
@@ -31,13 +34,13 @@ class PokerMDP:
 
 	# Checks to see if a state is a terminal state. 
 	def isEnd(self, state):
-		folded = sum([1 if not player else 0 for player in state.players])
-		return len(state.board) == 5 or folded == self.numPlayers - 1
+		numFolded = sum([1 if not player[0] else 0 for player in state.players])
+		return len(state.board) == 6 or numFolded == self.numPlayers - 1
 
 
 	def getWinner(self, state):
-		results = [Evaluator.evaluate(player[0]) for player in state.curPlayer]
-		return results.index(max(results))
+		results = [evaluator.evaluate(self.board, player[0]) for player in state.players]
+		return results.index(min(results))
 
 
 	# Return reward for a given state
@@ -85,8 +88,11 @@ class PokerMDP:
 		#River
 		if l == 5:
 			return 3
+		#End of round
+		if l == 6:
+			return 4
 
-	# Generates a next state probabilistically based on current state. 
+	# Generates a next state probabilistically based on current state
 	def sampleNextState(self, state, action):
 		#Update state based on action
 		if action == -1:
@@ -95,7 +101,7 @@ class PokerMDP:
 		else:
 			#Add players action to their running total bet
 			newPlayerBet = state.players[state.curPlayer] + action
-			state.players[state.curPlayer] = newPlayerBet
+			state.players[state.curPlayer][1] = newPlayerBet
 			#Total bet for the round is equal to the player's total running bet
 			state.curBet = newPlayerBet
 			#Add the players bet to the pot
@@ -106,7 +112,7 @@ class PokerMDP:
 				#Flop
 				state.board += self.deck.draw(3)
 			else:
-				#Turn or River
+				#Turn or River or End of round
 				state.board += self.deck.draw(1)
 			#Reset current bet for the round
 			state.curBet = 0
@@ -116,7 +122,7 @@ class PokerMDP:
 			state.curPlayer += 1
 			state.curPlayer %= self.numPlayers
 
-		return state
+		return state, getReward(state)
 
 	#################################################################################
 	#								INITIALIZE MDP 									#
@@ -135,9 +141,9 @@ class PokerMDP:
 		return state
 
 
-	def __init__(self):
-		self.numPlayers = 4
+	def __init__(self, numPlayers, maxRaise):
+		self.numPlayers = numPlayers
 		self.deck = Deck()
-		self.maxRaise = 51
-		self.state = self.initState()
+		self.maxRaise = maxRaise + 1
+
 		#DECLARE GLOBAL VARIABLES (HYPERPARAMETERS) HERE!
