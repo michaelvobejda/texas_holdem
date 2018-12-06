@@ -139,4 +139,5 @@ class PokerMDP:
 		self.numPlayers = 4
 		self.deck = Deck()
 		self.maxRaise = 51
+		self.state = self.initState()
 		#DECLARE GLOBAL VARIABLES (HYPERPARAMETERS) HERE!
