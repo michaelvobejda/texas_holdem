@@ -30,7 +30,7 @@ def simulate(actionCommand, numPlayers, maxRaise, playerWallets, trial_num):
 		
 		if mdp.isEnd(state): break
 
-		curPlayer = state.curPlayer
+		curPlayer = state['curPlayer']
 
 		actions = mdp.getActions(state)
 
@@ -65,7 +65,7 @@ def simulate(actionCommand, numPlayers, maxRaise, playerWallets, trial_num):
 
 
 def runBaselines(numPlayers, maxRaise, playerWallets):
-	
+
 	# RANDOM ACTION POLICY
 	for i in range(num_trials):
 		actionCommand = getRandomAction
