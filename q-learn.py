@@ -6,14 +6,15 @@ from mdp import PokerMDP
 #### DECLARE GLOBAL VARIABLES HERE #################################
 
 max_iterations = 10
-
+learning_rate = 0.8
+discount = 1
 
 #### Q-LEARNING HELPER FUNCTIONS #################################
 
 # Return a single-element list containing a binary (indicator) feature
 # for the existence of the (state, action) pair.  Provides no generalization.
 def featureExtractor(state, action):
-    
+
 
 # OPTIONAL
 # Call this function to get the step size to update the weights.
@@ -34,6 +35,7 @@ def chooseAction(state, actions):
 # Note that if s is a terminal state, then s' will be None.   
 # Use getQ() to compute the current estimate of the parameters.
 def incorporateFeedback(state, action, reward, newState, actions, num_iterations, newState_is_end):
+
 
 #### SIMULATE (RUN Q-LEARNING) #####################################
 
