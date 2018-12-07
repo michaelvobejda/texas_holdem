@@ -6,13 +6,19 @@ from collections import defaultdict
 from deuces import Evaluator
 
 import random
+
 #### DECLARE GLOBAL VARIABLES HERE #################################
 
 learning_rate = 1
 discount = 1
 explorationProb = 0.15
-agentQ = 2
-weights = defaultdict(float)
+
+#HARD CODED FOR 5 PLAYERS
+weights0 = defaultdict(float)
+weights1 = defaultdict(float)
+weights2 = defaultdict(float)
+weights3 = defaultdict(float)
+weights4 = defaultdict(float)
 
 evaluator = Evaluator()
 
@@ -57,30 +63,41 @@ def handRankAndBinaryFE(state, action):
 		if (len(state['board']) == 6): return (evaluator.evaluate(state['board'][:5], hand), a)
 		return (evaluator.evaluate(state['board'], hand), a)
 
-featureExtractor = standardFE
-
 ####################################
 
 
 #### Q-LEARNING MAIN FUNCTIONS #################################
 
-# Return the Q function associated with the weights and features
-def getQ(state, action):
-	key = featureExtractor(state, action)
-	return weights[key]
+# HARD-CODED!! Return the Q function associated with the weights and features
+def getQ(state, action, curPlayer):
+	if (curPlayer == 0):
+		key = actionAgnosticFE(state, action)
+		return weights0[key]
+	elif (curPlayer == 1):
+		key = standardFE(state, action)
+		return weights1[key]
+	elif (curPlayer == 2):
+		key = handRankAndBinaryFE(state, action)
+		return weights2[key]
+	elif (curPlayer == 3):
+		key = handRankFE(state, action)
+		return weights3[key]
+	else: 
+		key = binaryActionFE(state, action)
+		return weights4[key]	
     
 # This algorithm will produce an action given a state 
 # by following some strategy. 
 # For example, we could use epsilon-greedy algorithm: 
 # with probability |explorationProb|, take a random action.
-def chooseAction(state, actions):
+def chooseAction(state, actions, curPlayer):
 	if random.random() < explorationProb:
 		return random.choice(actions)
 	else:
 		max_actions = [-1]
 		max_q = float('-inf')
 		for a in actions:
-			q = getQ(state, a)
+			q = getQ(state, a, curPlayer)
 			#if (q!=0): print(q)
 			if (q > max_q):
 				max_q = q
@@ -94,22 +111,32 @@ def chooseAction(state, actions):
 # Call this function with (s, a, r, s'), which you should use to update |weights|.
 # Note that if s is a terminal state, then s' will be None.   
 # Use getQ() to compute the current estimate of the parameters.
-def incorporateFeedback(state, action, reward, newState, actions, newState_is_end):
+def incorporateFeedback(state, action, reward, newState, actions, newState_is_end, curPlayer):
 	qp = 0
 	if not newState_is_end:
 		for a in actions:
-			q = getQ(newState, a)
+			q = getQ(newState, a, curPlayer)
 			if (q > qp):
 				qp = q
 
 	#update = learning_rate * (reward + (discount * qp) - getQ(state, action))
-	if (action == -1): update =  0  
+	if (action == -1): update = 0  
 	else: 
 		if (reward < 0):
-			update = learning_rate * (abs(1/(reward+0.01)) + (discount * qp) - getQ(state, action))
+			update = learning_rate * (abs(1/(reward+0.01)) + (discount * qp) - getQ(state, action, curPlayer))
 		else: 
-			update = learning_rate * (reward + (discount * qp) - getQ(state, action))
-	weights[featureExtractor(state, action)] += update
+			update = learning_rate * (reward + (discount * qp) - getQ(state, action, curPlayer))
+	
+	if (curPlayer == 0):
+		weights0[actionAgnosticFE(state, action)] += update
+	elif (curPlayer == 1):
+		weights1[standardFE(state, action)] += update
+	elif (curPlayer == 2):
+		weights2[handRankAndBinaryFE(state, action)] += update
+	elif (curPlayer == 3):
+		weights3[handRankFE(state, action)] += update
+	else: 
+		weights4[binaryActionFE(state, action)] += update
 
 
 #### SIMULATE (RUN Q-LEARNING) #####################################
@@ -129,12 +156,8 @@ def simulateQLearning(numPlayers, maxRaise, playerWallets):
 
 		curPlayer = state['curPlayer']
 
-		# If player is agentQ, choose action based on Q and epsilon-greedy search strategy. 
-		if curPlayer == agentQ:
-			action = chooseAction(state, actions)
-		# Else select random action
-		else:
-			action = random.choice(actions) #state['curBet']-state['players'][state['curPlayer']][1]  #random.choice(actions)     #random.choice(actions) # TODO: write a better function
+		# Choose action based on Q and epsilon-greedy search strategy. 
+		action = chooseAction(state, actions, curPlayer)
 
         # Observe newState and associated reward. 
 		newState, rewards = mdp.sampleNextState(state, action)
@@ -145,13 +168,11 @@ def simulateQLearning(numPlayers, maxRaise, playerWallets):
 		actions = mdp.getActions(newState)		
 
         # Update Q weights 
-		if curPlayer == agentQ:
-			incorporateFeedback(state, action, reward, newState, actions, mdp.isEnd(newState))
+		incorporateFeedback(state, action, reward, newState, actions, mdp.isEnd(newState), curPlayer)
 
 		# Update state		
 		state = newState
 
-	return weights 
 
 
 
