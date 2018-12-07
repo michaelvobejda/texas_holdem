@@ -7,7 +7,7 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 
 # Global variables
-numGames = 1000
+numGames = 1000000
 numPlayers = 7
 maxRaise = 50
 
@@ -64,7 +64,7 @@ def runGame():
     for i in range(numGames):
         weightLens = qlearn.simulateQLearning(numPlayers, maxRaise, playerWallets)
         # montecarlo.simulateMonteCarlo(numPlayers, maxRaise, playerWallets)
-        if i % 1000 == 0:
+        if i % 10000 == 0:
             print('~~~~~ GAME ' + str(i) + ' ~~~~~')
             print('weight lens:', weightLens)
             print('player wallets:', playerWallets)
