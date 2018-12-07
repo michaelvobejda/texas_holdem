@@ -72,7 +72,7 @@ class PokerMDP:
 
 		if self.isEnd(state):
 			winner = self.getWinner(state)
-			print('Winner: ', winner)
+			# print('Winner: ', winner)
 			rewards[winner] += state['pot']
 			return rewards
 
@@ -96,8 +96,8 @@ class PokerMDP:
 		nextPlayer = (state['curPlayer'] + 1) % self.numPlayers
 		nextPlayerHand, nextPlayerBet = state['players'][nextPlayer]
 		roundOver = nextPlayerBet == state['curBet']
-		if roundOver:
-			print('\n\n!!!!!!!!!!!!!!!Round finished!!!!!!!!!!!!!!!!!:', state)
+		# if roundOver:
+			# print('\n\n!!!!!!!!!!!!!!!Round finished!!!!!!!!!!!!!!!!!:', state)
 		return roundOver
 
 	def getStartingPlayer(self, state):

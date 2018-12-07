@@ -19,7 +19,11 @@ agentQ = 0
 
 # Simplify board state to just consider board hands and player hand
 def featureExtractor(state, action):
-	return (tuple(sorted(state['board'] + state['players'][state['curPlayer']][0])), action)
+	if not state['players'][state['curPlayer']][0]:
+		# return (0, action)
+		return 0
+	# return (tuple(sorted(state['board'] + state['players'][state['curPlayer']][0])), action)
+	return tuple(sorted(state['board'] + state['players'][state['curPlayer']][0]))
 
 
 #### Q-LEARNING MAIN FUNCTIONS #################################
@@ -46,7 +50,7 @@ def chooseAction(state, actions):
 				max_actions = [a]
 			elif (q == max_q):
 				max_actions.append(a)
-		print('max actions:', max_actions)
+		# print('max actions:', max_actions)
 		return random.choice(max_actions)
 
 
@@ -74,7 +78,10 @@ def simulateQLearning(numPlayers, maxRaise, playerWallets):
 
 		#CASE: Game Over
 		if mdp.isEnd(state): 
-		    break 
+			rewards = mdp.getRewards(state, action)
+			for i, reward in enumerate(rewards):
+				playerWallets[i] += reward
+			break 
 
 		curPlayer = state['curPlayer']
 
@@ -100,7 +107,7 @@ def simulateQLearning(numPlayers, maxRaise, playerWallets):
 		# Update state		
 		state = newState
 
-	return playerWallets
+
 
 
 

@@ -8,7 +8,7 @@ import copy
 agentQ = 0
 num_trials = 5
 
-debug = True
+debug = False
 
 #### GET_ACTIONS() METHODS #################################
 
