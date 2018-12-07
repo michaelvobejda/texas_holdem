@@ -78,10 +78,11 @@ class PokerMDP:
 				return 0
 
 		else:
-			if self.roundIsOver(state):
-				return -1*playerBet
-			else:
-				return 0
+			return -1*playerBet
+			# if self.roundIsOver(state):
+			# 	return -1*playerBet
+			# else:
+			# 	return 0
 
 
 	#The round is over once all players have paid, which we know is true if the current player's bet is equal to the current bet
@@ -89,9 +90,9 @@ class PokerMDP:
 		#Unpack player state
 		playerHand, playerBet = state['players'][state['curPlayer']]
 
-		#Check if current player has folded
-		if not playerHand:
-			return False
+		# #Check if current player has folded
+		# if not playerHand:
+		# 	return False
 
 		#WARNING: Code below is hard-coded for self.boardLength = 5!! 
 		start = self.getStartingPlayer(state)
@@ -118,7 +119,7 @@ class PokerMDP:
 		#End of round				
 		if l == 5:
 			return 0
-			
+
 	# Generates a next state probabilistically based on current state
 	def sampleNextState(self, state, action):
 		#Update state based on action

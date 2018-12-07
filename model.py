@@ -14,9 +14,9 @@ def runGame():
     bs.runBaselines(numPlayers, maxRaise, playerWallets)
 
     #RUN Q-LEARNING
-    for _ in range(numRounds):
-        playerWallets = simulateQLearning(numPlayers, maxRaise, playerWallets)
-        print('Player wallets after round ' + i + ': ' + playerMoney + '.')
+    # for _ in range(numRounds):
+    #     playerWallets = simulateQLearning(numPlayers, maxRaise, playerWallets)
+    #     print('Player wallets after round ' + i + ': ' + playerMoney + '.')
 
 
 

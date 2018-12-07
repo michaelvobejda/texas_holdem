@@ -26,8 +26,10 @@ def simulate(actionCommand, numPlayers, maxRaise, playerWallets, trial_num):
 	total_reward = 0
 	its = 0
 	while True:
-		
+
 		if mdp.isEnd(state): 
+			# winner = mdp.getWinner(state)
+			# playerWallets[winner] += state['pot']	#Add the winning player's winnings!! 
 			break
 
 		curPlayer = state['curPlayer']
