@@ -3,7 +3,7 @@
 
 import math, random, itertools
 from collections import defaultdict
-from deuces import Deck, Evaluator
+from deuces import Deck, Evaluator, Card
 
 evaluator = Evaluator()
 
@@ -48,6 +48,8 @@ class PokerMDP:
 			if (hand):
 				if len(state['board']) == 6:
 					state['board'].pop(5)
+				# print('board', Card.print_pretty_cards(state['board']))
+				# print('hand', Card.print_pretty_cards(hand))
 				rank = evaluator.evaluate(state['board'], hand)
 				if (rank < best_rank): 
 					best_rank = rank
@@ -70,6 +72,8 @@ class PokerMDP:
 				return 0
 
 		else:
+			if action == -1:
+				return 0
 			return -1 * action
 
 
