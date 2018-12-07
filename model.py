@@ -1,11 +1,12 @@
 import qlearn 		#import simulateQLearning
+import montecarlo
 import baselines as bs
 import copy
 from collections import defaultdict
 
 # Global variables
-numGames = 10000000
-numPlayers = 3
+numGames = 100000000
+numPlayers = 7
 maxRaise = 50
 
 
@@ -17,10 +18,12 @@ def runGame():
 
     #RUN Q-LEARNIG
     for i in range(numGames):
-        qlearn.simulateQLearning(numPlayers, maxRaise, playerWallets)
+        # qlearn.simulateQLearning(numPlayers, maxRaise, playerWallets)
+        montecarlo.simulateMonteCarlo(numPlayers, maxRaise, playerWallets)
         if i % 10000 == 0:
-        	print(len(qlearn.weights))
-    		print('Player wallets after game ' + str(i) + ': ' + str(playerWallets) + '.')
+        	# print(len(qlearn.weights))
+            print(len(montecarlo.weights))
+            print('Player wallets after game ' + str(i) + ': ' + str(playerWallets) + '.')
 
 
 

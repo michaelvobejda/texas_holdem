@@ -1,22 +1,16 @@
-###### Q-LEARNING #######################################
-#########################################################
-
 from mdp import PokerMDP
 from collections import defaultdict
+import random
+import math
 from deuces import Evaluator
 
-
-# TODO:
-# -change reward function to have folding give negative total bets
-
-import random
-#### DECLARE GLOBAL VARIABLES HERE #################################
-
-learning_rate = 1
+max_iterations = 10
 discount = 1
-explorationProb = 0.15
-agentQ = 3
+visited = []
+counts = defaultdict(lambda: defaultdict(int))
 weights = defaultdict(float)
+agentCarlo = 3
+c = 1 # exploration constant
 
 evaluator = Evaluator()
 
@@ -61,68 +55,98 @@ def handRankAndBinaryFE(state, action):
 		if (len(state['board']) == 6): return (evaluator.evaluate(state['board'][:5], hand), a)
 		return (evaluator.evaluate(state['board'], hand), a)
 
-featureExtractor = handRankAndBinaryFE
 
-####################################
+featureExtractor = handRankAndBinaryFE	
 
 
-#### Q-LEARNING MAIN FUNCTIONS #################################
+################### HELPER FUNCTIONS ###############################
+# Simplify board state to just consider board hands and player hand
+
+def setQ(state, action, val):
+	key = featureExtractor(state, action)
+	weights[key] = val
+
 
 # Return the Q function associated with the weights and features
 def getQ(state, action):
 	key = featureExtractor(state, action)
 	return weights[key]
-    
-# This algorithm will produce an action given a state 
-# by following some strategy. 
-# For example, we could use epsilon-greedy algorithm: 
-# with probability |explorationProb|, take a random action.
-def chooseAction(state, actions):
-	if random.random() < explorationProb:
-		return random.choice(actions)
-	else:
-		max_actions = [-1]
-		max_q = float('-inf')
-		for a in actions:
-			q = getQ(state, a)
-			#if (q!=0): print(q)
-			if (q > max_q):
-				max_q = q
-				max_actions = [a]
-			elif (q == max_q):
-				max_actions.append(a)
-		# print('max actions:', max_actions)
-		return random.choice(max_actions)
+
+#################### MAIN FUNCTIONS #################################
+def simulate(mdp, state, depth):
+	if depth == 0:
+		return 0
+
+	actions = mdp.getActions(state)
+	if state not in visited:
+		visited.append(tuple(state))
+		for action in actions:
+			counts[tuple(state)][action] = 1
+
+		return rollout(mdp, state, depth)
+
+	max_actions = []
+	max_val = float('-inf')
+	for a in actions:
+		Q = getQ(state, a)
+		val = Q + c * math.sqrt(math.log(sum(counts[tuple(state)]))/counts[tuple(state)][a])
+		if (val > max_val):
+			max_val = val
+			max_actions = [a]
+		elif (val == max_val):
+			max_actions.append(a)
+	a = random.choice(max_actions)
+
+	# Observe newState and associated reward. 
+	newState, rewards = mdp.sampleNextState(state, a)
+	reward = rewards[state['curPlayer']]
+
+	cur_state = newState
+
+	q = reward + discount*simulate(mdp, newState, depth-1)
+	counts[state][action] += 1
+
+	Q = getQ(state, a)
+	newQ = Q + (q-Q)/counts[state][action]
+	setQ(state, action, newQ)
+
+	return q
+
+def rollout(mdp, state, depth):
+	if depth == 0:
+		return 0
+
+	#set action to default policy, which is calling
+	a = mdp.getActions(state)[0]
+
+	newState, rewards = mdp.sampleNextState(state, a)
+	reward = rewards[state['curPlayer']]
+
+	return reward + discount*rollout(mdp, newState, depth-1)
+
+def chooseAction(mdp, state, depth):
+	for i in range(max_iterations):
+		simulate(mdp, state, depth)
+
+	best_actions = []
+	max_q = float("-inf")
+	actions = mdp.getActions(state)
+	for a in actions:
+		q = getQ(state, a)
+		if (q > max_q):
+			max_q = q
+			max_actions = [a]
+		elif (q == max_q):
+			max_actions.append(a)
+	return random.choice(max_actions)
 
 
-# Call this function with (s, a, r, s'), which you should use to update |weights|.
-# Note that if s is a terminal state, then s' will be None.   
-# Use getQ() to compute the current estimate of the parameters.
-def incorporateFeedback(state, action, reward, newState, actions, newState_is_end):
-	qp = 0
-	if not newState_is_end:
-		for a in actions:
-			q = getQ(newState, a)
-			if (q > qp):
-				qp = q
 
-	#update = learning_rate * (reward + (discount * qp) - getQ(state, action))
-	if (action == -1): 
-		update =  0  
-	else: 
-		if (reward < 0):
-			update = learning_rate * (abs(1/(reward)) + (discount * qp) - getQ(state, action))
-		else: 
-			update = learning_rate * (reward + (discount * qp) - getQ(state, action))
-	weights[featureExtractor(state, action)] += update
-
-
-#### SIMULATE (RUN Q-LEARNING) #####################################
-
-def simulateQLearning(numPlayers, maxRaise, playerWallets):
+def simulateMonteCarlo(numPlayers, maxRaise, playerWallets):
 	mdp = PokerMDP(numPlayers, maxRaise)
 	state = mdp.initState()
 	actions = mdp.getActions(state)
+	depth = 3
 	while True:
 
 		#CASE: Game Over
@@ -135,11 +159,11 @@ def simulateQLearning(numPlayers, maxRaise, playerWallets):
 		curPlayer = state['curPlayer']
 
 		# If player is agentQ, choose action based on Q and epsilon-greedy search strategy. 
-		if curPlayer == agentQ:
-			action = chooseAction(state, actions)
+		if curPlayer == agentCarlo:
+			action = chooseAction(mdp, state, depth)
 		# Else select random action
 		else:
-			# action = state['curBet'] - state['players'][state['curPlayer']][1]
+			# action = state['curBet'] - state['players'][state['curPlayer']][1]  
 			action = random.choice(actions) # TODO: write a better function
 
         # Observe newState and associated reward. 
@@ -151,19 +175,10 @@ def simulateQLearning(numPlayers, maxRaise, playerWallets):
 		actions = mdp.getActions(newState)		
 
         # Update Q weights 
-		if curPlayer == agentQ:
-			incorporateFeedback(state, action, reward, newState, actions, mdp.isEnd(newState))
+		# if curPlayer == agentCarlo:
+			# incorporateFeedback(state, action, reward, newState, actions, mdp.isEnd(newState))
 
 		# Update state		
 		state = newState
 
 	return weights 
-
-
-
-
-
-
-
-
-
