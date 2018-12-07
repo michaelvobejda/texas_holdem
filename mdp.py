@@ -63,9 +63,7 @@ class PokerMDP:
 
 
 	# Return reward for a given state
-	def getReward(self, state):
-		# print('curPlayer:', state['curPlayer'])
-		# print('len of players:', len(state['players']))
+	def getReward(self, state, action):
 		playerHand, playerBet = state['players'][state['curPlayer']]
 
 		if not playerHand:
@@ -78,11 +76,7 @@ class PokerMDP:
 				return 0
 
 		else:
-			return -1*playerBet
-			# if self.roundIsOver(state):
-			# 	return -1*playerBet
-			# else:
-			# 	return 0
+			return -1 * action
 
 
 	#The round is over once all players have paid, which we know is true if the current player's bet is equal to the current bet
@@ -91,19 +85,10 @@ class PokerMDP:
 		playerHand, playerBet = state['players'][state['curPlayer']]
 
 		# #Check if current player has folded
-		# if not playerHand:
-		# 	return False
+		if not playerHand:
+			return False
 
-		#WARNING: Code below is hard-coded for self.boardLength = 5!! 
-		start = self.getStartingPlayer(state)
-		if (start == 0):
-			return state['curPlayer'] == 2
-		elif (start == 1):
-			return state['curPlayer'] == 0
-		else: 
-			return state['curPlayer'] == 1
-
-		#OLD: return playerBet == state['curBet']
+		return playerBet == state['curBet']
 
 	def getStartingPlayer(self, state):
 		l = len(state['board'])
@@ -118,7 +103,10 @@ class PokerMDP:
 			return 2
 		#End of round				
 		if l == 5:
-			return 0
+			return 0 # HARDCODED FOR 3 PLAYERS
+		# End of game
+		if l == 6:
+			return 1
 
 	# Generates a next state probabilistically based on current state
 	def sampleNextState(self, state, action):
@@ -174,6 +162,6 @@ class PokerMDP:
 		self.numPlayers = numPlayers
 		self.maxRaise = maxRaise + 1
 		self.deck = Deck()
-		self.boardLength = 5
+		self.boardLength = 6
 
 		#DECLARE GLOBAL VARIABLES (HYPERPARAMETERS) HERE!
