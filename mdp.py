@@ -39,6 +39,13 @@ class PokerMDP:
 
 
 	def getWinner(self, state):
+		if (self.isEnd(state)):
+			numFolded = sum([1 if not player[0] else 0 for player in state['players']])
+			if numFolded == self.numPlayers - 1:
+				for i, player in enumerate(state['players']):
+					if player[0]:
+						return i
+
 		
 		#Return index of winner 
 		best_rank = float("inf")
@@ -59,22 +66,22 @@ class PokerMDP:
 
 
 	# Return reward for a given state
-	def getReward(self, state, action):
+	def getRewards(self, state, action):
+		rewards = [0 for _ in range(self.numPlayers)]
 		playerHand, playerBet = state['players'][state['curPlayer']]
 
-		if not playerHand:
-			return 0
 		if self.isEnd(state):
 			winner = self.getWinner(state)
-			if state['curPlayer'] == winner:
-				return state['pot']
-			else:
-				return 0
+			rewards[winner] += state['pot']
+			return rewards
 
-		else:
-			if action == -1:
-				return 0
-			return -1 * action
+		if action == -1:
+			return rewards
+
+		# print('current player:', state['curPlayer'])
+		rewards[state['curPlayer']] -= action
+		return rewards
+
 
 
 	#The round is over once all players have paid, which we know is true if the current player's bet is equal to the current bet
@@ -109,6 +116,7 @@ class PokerMDP:
 	# Generates a next state probabilistically based on current state
 	def sampleNextState(self, state, action):
 		#Update state based on action
+		rewards = self.getRewards(state, action)
 		if action == -1:
 			#Player folded, set their hand to False
 			state['players'][state['curPlayer']] = (False, state['players'][state['curPlayer']][1])
@@ -137,7 +145,7 @@ class PokerMDP:
 			state['curPlayer'] += 1
 			state['curPlayer'] %= self.numPlayers
 
-		return state, self.getReward(state, action)
+		return state, rewards
 
 	#################################################################################
 	#								INITIALIZE MDP 									#

@@ -51,7 +51,8 @@ def simulate(state, depth):
 	a = random.choice(max_actions)
 
 	# Observe newState and associated reward. 
-    newState, reward = mdp.sampleNextState(state, best_action)
+    newState, rewards = mdp.sampleNextState(state, best_action)
+	reward = rewards[state['curPlayer']]
     total_rewards += reward
 
     cur_state = newState
@@ -72,7 +73,8 @@ def rollout(state, depth):
 	#set action to default policy
 	a = mdp.getActions(state)[0]
 
-	newState, reward = mdp.sampleNextState(state, best_action)
+	newState, rewards = mdp.sampleNextState(state, best_action)
+	reward = rewards[state['curPlayer']]
 
 	return reward + discount*rollout(newState, depth-1)
 

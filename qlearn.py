@@ -86,7 +86,8 @@ def simulateQLearning(numPlayers, maxRaise, playerWallets):
 			action = random.choice(actions) # TODO: write a better function
 
         # Observe newState and associated reward. 
-		newState, reward = mdp.sampleNextState(state, action)
+		newState, rewards = mdp.sampleNextState(state, action)
+		reward = rewards[curPlayer]
 		playerWallets[curPlayer] += reward
 
 		# Get actions for new state
