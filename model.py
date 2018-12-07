@@ -20,9 +20,9 @@ def runGame():
     for i in range(numGames):
         # qlearn.simulateQLearning(numPlayers, maxRaise, playerWallets)
         montecarlo.simulateMonteCarlo(numPlayers, maxRaise, playerWallets)
-        if i % 10000 == 0:
+        if i % 1 == 0:
         	# print(len(qlearn.weights))
-            print(len(montecarlo.weights))
+            # print(len(montecarlo.weights))
             print('Player wallets after game ' + str(i) + ': ' + str(playerWallets) + '.')
 
 

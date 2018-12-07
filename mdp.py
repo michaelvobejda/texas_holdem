@@ -4,6 +4,7 @@
 import math, random, itertools
 from collections import defaultdict
 from deuces import Deck, Evaluator, Card
+import copy
 
 evaluator = Evaluator()
 
@@ -55,9 +56,12 @@ class PokerMDP:
 			if (hand):
 				if len(state['board']) == 6:
 					state['board'].pop(5)
-				# print('board', Card.print_pretty_cards(state['board']))
-				# print('hand', Card.print_pretty_cards(hand))
+				# print('board:')
+				# Card.print_pretty_cards(state['board'])
+				# print('hand:')
+				# Card.print_pretty_cards(hand)
 				rank = evaluator.evaluate(state['board'], hand)
+				# print("Rank: ", rank)
 				if (rank < best_rank): 
 					best_rank = rank
 					index_of_best = i
@@ -122,6 +126,11 @@ class PokerMDP:
 	# Generates a next state probabilistically based on current state
 	def sampleNextState(self, state, action):
 
+		# if generate:
+			# deck = copy.copy(self.deck.cards)
+		# else:
+		deck = self.deck
+
 		#Update state based on action
 		rewards = self.getRewards(state, action)
 		if action == -1:
@@ -143,10 +152,11 @@ class PokerMDP:
 			
 			if len(state['board']) == 0:
 				#Flop
-				state['board'] = state['board'] + self.deck.draw(3)
+				state['board'] = state['board'] + deck.draw(3)
 			else:
+				# print(len(state['board']))
 				#Turn or River or End of round
-				state['board'] = state['board'] + [self.deck.draw(1)]
+				state['board'] = state['board'] + [deck.draw(1)]
 			#Reset current bet for the round
 			state['curBet'] = 0
 			#Rotate starting bet
@@ -179,10 +189,13 @@ class PokerMDP:
 		return state
 
 
-	def __init__(self, numPlayers, maxRaise):
+	def __init__(self, numPlayers, maxRaise, deck=False):
 		self.numPlayers = numPlayers
 		self.maxRaise = maxRaise + 1
-		self.deck = Deck()
+		if deck:
+			self.deck = deck
+		else:
+			self.deck = Deck()
 		self.boardLength = 5
 
 		#DECLARE GLOBAL VARIABLES (HYPERPARAMETERS) HERE!
