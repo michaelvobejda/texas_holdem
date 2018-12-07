@@ -36,6 +36,27 @@ def plotGraph(x, walletY, weightLenY):
     plt.legend()
     plt.show()
 
+    for i in range(numPlayers - 1):
+        if i == 0: 
+            l = "Standard"
+        if i == 1: 
+            l = "Action Agnostic"
+        if i == 2: 
+            l = "Binary Action"
+        if i == 3: 
+            l = "Hand Rank"
+        if i == 4: 
+            l = "Hand Rank with Binary Action"
+        if i == 5:
+            l = "Random Action"
+
+        plt.plot(x, walletY[i], label=l)
+    plt.xlabel('Games Played')
+    plt.ylabel('Earnings')
+    plt.title('Earning of Q Agents Over Time')
+    plt.legend()
+    plt.show()
+
     for i in range(numPlayers - 2):
 
 		if (i == 0): l = "Standard"
