@@ -19,7 +19,8 @@ class PokerMDP:
 		playerHand, playerBet = state['players'][state['curPlayer']]
 
 		if not playerHand:
-			return []
+			#return []
+			return [-1]
 
 		callVal = state['curBet'] - playerBet
 		actions = [a for a in range(callVal, callVal + self.maxRaise, 10)]
@@ -39,6 +40,13 @@ class PokerMDP:
 
 
 	def getWinner(self, state):
+
+		#SPECIAL CASE: All players fold in first round (when state['board'] == [])
+		#In this case, the last player to have bet wins. 
+		if (state['board'] == []):
+			return self.numPlayers-1
+		
+		#Return index of winner 
 		best_rank = float("inf")
 		index_of_best = None
 		for i, player in enumerate(state['players']):
@@ -48,6 +56,7 @@ class PokerMDP:
 				if (rank < best_rank): 
 					best_rank = rank
 					index_of_best = i
+		
 		return index_of_best
 		#results = [evaluator.evaluate(state['board'], player[0]) for player in state['players']]
 		#return results.index(min(results))
@@ -84,7 +93,16 @@ class PokerMDP:
 		if not playerHand:
 			return False
 
-		return playerBet == state['curBet']
+		#WARNING: Code below is hard-coded for self.boardLength = 5!! 
+		start = self.getStartingPlayer(state)
+		if (start == 0):
+			return state['curPlayer'] == 2
+		elif (start == 1):
+			return state['curPlayer'] == 0
+		else: 
+			return state['curPlayer'] == 1
+
+		#OLD: return playerBet == state['curBet']
 
 	def getStartingPlayer(self, state):
 		l = len(state['board'])
@@ -97,13 +115,10 @@ class PokerMDP:
 		#Turn
 		if l == 4:
 			return 2
-		#River
+		#End of round				
 		if l == 5:
 			return 0
-		#End of round
-		if l == 6:
-			return 1
-
+			
 	# Generates a next state probabilistically based on current state
 	def sampleNextState(self, state, action):
 		#Update state based on action

@@ -7,17 +7,14 @@ import random
 agentQ = 0
 num_trials = 5
 
-callmdp = None
-
 
 #### GET_ACTIONS() METHODS #################################
 
 def getRandomAction(state, actions):
-	print(actions)
+	if (actions == []): return [[]]
 	return [random.choice(actions)]
 
 def getMaxBetAction(state, actions):
-	actions = callmdp.getActions(state)
 	return [max(actions)]
 
 #### SIMULATION METHOD #################################
@@ -30,7 +27,6 @@ def simulate(actionCommand, numPlayers, maxRaise, playerWallets, trial_num):
 	while True:
 		
 		if mdp.isEnd(state): 
-			print(state)
 			break
 
 		curPlayer = state['curPlayer']
@@ -57,7 +53,7 @@ def simulate(actionCommand, numPlayers, maxRaise, playerWallets, trial_num):
 					max_state = newState
 			state = max_state
 			total_reward += max_reward
-			playerWallets[curPlayer] += reward
+			playerWallets[curPlayer] += max_reward
 			its += 1
 
 	if its == 0:
@@ -69,8 +65,6 @@ def simulate(actionCommand, numPlayers, maxRaise, playerWallets, trial_num):
 #### CALL BASELINES #################################
 
 def runBaselines(numPlayers, maxRaise, playerWallets):
-
-	callmdp = PokerMDP(numPlayers, maxRaise)
 
 	# RANDOM ACTION POLICY
 	print("RANDOM ACTION POLICY")
