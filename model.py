@@ -7,30 +7,28 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 
 # Global variables
-numGames = 5000
+numGames = 1000
 numPlayers = 7
 maxRaise = 50
 
 
 def plotGraph(x, walletY, weightLenY):
     for i in range(numPlayers):
-
-        if (i == 0): 
+        if i == 0: 
             l = "Standard"
-        if (i == 1): 
+        if i == 1: 
             l = "Action Agnostic"
-        if (i == 2): 
+        if i == 2: 
             l = "Binary Action"
-        if (i == 3): 
+        if i == 3: 
             l = "Hand Rank"
-        if (i == 4): 
+        if i == 4: 
             l = "Hand Rank with Binary Action"
-        if (i == 5):
-            l == "Random Action"
-        if (i == 6):
-            l == "Always Call"
-        print('x:', x)
-        print('walletY[i]:', walletY[i])
+        if i == 5:
+            l = "Random Action"
+        if i == 6:
+            l = "Always Call"
+
         plt.plot(x, walletY[i], label=l)
     plt.xlabel('Games Played')
     plt.ylabel('Earnings')
