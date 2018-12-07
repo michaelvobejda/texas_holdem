@@ -83,6 +83,7 @@ def runGame():
     walletY = [[] for _ in range(numPlayers)]
     weightLenY = [[] for _ in range(numPlayers)]
     for i in range(numGames):
+
         weightLens = qlearn.simulateQLearning(numPlayers, maxRaise, playerWallets)
         # montecarlo.simulateMonteCarlo(numPlayers, maxRaise, playerWallets)
         if i % 10000 == 0:
