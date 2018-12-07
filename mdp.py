@@ -101,22 +101,23 @@ class PokerMDP:
 		return roundOver
 
 	def getStartingPlayer(self, state):
-		l = len(state['board'])
-		#Initial round of betting
-		if l == 0:
-			return 0
-		#Flop
-		if l == 3: 
-			return 1
-		#Turn
-		if l == 4:
-			return 2
-		#End of round				
-		if l == 5:
-			return 0 # HARDCODED FOR 3 PLAYERS
-		# End of game
-		if l == 6:
-			return 1
+		return random.choice([i for i in range(0, self.numPlayers)])
+		# l = len(state['board'])
+		# #Initial round of betting
+		# if l == 0:
+		# 	return 0
+		# #Flop
+		# if l == 3: 
+		# 	return 1
+		# #Turn
+		# if l == 4:
+		# 	return 2
+		# #End of round				
+		# if l == 5:
+		# 	return 0 # HARDCODED FOR 3 PLAYERS
+		# # End of game
+		# if l == 6:
+		# 	return 1
 
 	# Generates a next state probabilistically based on current state
 	def sampleNextState(self, state, action):
@@ -170,7 +171,8 @@ class PokerMDP:
 		state['board'] = []
 		state['pot'] = 0
 		state['curBet'] = 0
-		state['curPlayer'] = 0
+		#state['curPlayer'] = 0
+		state['curPlayer'] = random.choice([i for i in range(0, self.numPlayers)])
 		#player = (hand, curBet), hand=False if player has folded
 		state['players'] = [(self.deck.draw(2), False) for _ in range(self.numPlayers)]
 		

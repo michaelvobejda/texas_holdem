@@ -8,12 +8,11 @@ from deuces import Evaluator
 import random
 #### DECLARE GLOBAL VARIABLES HERE #################################
 
-
-learning_rate = 0.8
+learning_rate = 1
 discount = 1
-weights = defaultdict(float)
 explorationProb = 0.15
 agentQ = 0
+weights = defaultdict(float)
 
 evaluator = Evaluator()
 
@@ -26,7 +25,7 @@ def standardFE(state, action):
 def actionAgnosticFE(state, action):
 	if not state['players'][state['curPlayer']][0]:
 		return (0, )
-	return (tuple(sorted(state['board'] + state['players'][state['curPlayer']][0])), action)
+	return (tuple(sorted(state['board'] + state['players'][state['curPlayer']][0])), )
 
 def binaryActionFE(state, action):
 	if action == -1:
@@ -41,12 +40,24 @@ def handRankFE(state, action):
 	hand = state['players'][state['curPlayer']][0]
 	if not hand:
 		return 0
-	if len(state['board']) == 0:
+	if len(state['board']) < 5:
 		return tuple(hand)
 	else:
+		if (len(state['board']) == 6): return evaluator.evaluate(state['board'][:5], hand)
 		return evaluator.evaluate(state['board'], hand)
 
-featureExtractor = binaryActionFE
+def handRankAndBinaryFE(state, action):
+	a = binaryActionFE(state, action)[1]
+	hand = state['players'][state['curPlayer']][0]
+	if not hand:
+		return 0
+	if len(state['board']) < 5:
+		return tuple(hand)
+	else:
+		if (len(state['board']) == 6): return (evaluator.evaluate(state['board'][:5], hand), a)
+		return (evaluator.evaluate(state['board'], hand), a)
+
+featureExtractor = standardFE
 
 ####################################
 
@@ -70,6 +81,7 @@ def chooseAction(state, actions):
 		max_q = float('-inf')
 		for a in actions:
 			q = getQ(state, a)
+			#if (q!=0): print(q)
 			if (q > max_q):
 				max_q = q
 				max_actions = [a]
@@ -89,8 +101,15 @@ def incorporateFeedback(state, action, reward, newState, actions, newState_is_en
 			q = getQ(newState, a)
 			if (q > qp):
 				qp = q
-		update = learning_rate * (reward + (discount * qp) - getQ(state, action))
-		weights[featureExtractor(state, action)] += update
+
+	#update = learning_rate * (reward + (discount * qp) - getQ(state, action))
+	if (action == -1): update =  0  
+	else: 
+		if (reward < 0):
+			update = learning_rate * (abs(1/(reward+0.01)) + (discount * qp) - getQ(state, action))
+		else: 
+			update = learning_rate * (reward + (discount * qp) - getQ(state, action))
+	weights[featureExtractor(state, action)] += update
 
 
 #### SIMULATE (RUN Q-LEARNING) #####################################
@@ -115,7 +134,7 @@ def simulateQLearning(numPlayers, maxRaise, playerWallets):
 			action = chooseAction(state, actions)
 		# Else select random action
 		else:
-			action = random.choice(actions) # TODO: write a better function
+			action = state['curBet']  #random.choice(actions)     #random.choice(actions) # TODO: write a better function
 
         # Observe newState and associated reward. 
 		newState, rewards = mdp.sampleNextState(state, action)
@@ -131,6 +150,8 @@ def simulateQLearning(numPlayers, maxRaise, playerWallets):
 
 		# Update state		
 		state = newState
+
+	return weights 
 
 
 
