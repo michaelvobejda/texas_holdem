@@ -2,7 +2,8 @@
 #########################################################
 
 from mdp import PokerMDP
-import random 
+import random
+import copy
 
 agentQ = 0
 num_trials = 5
@@ -43,7 +44,7 @@ def simulate(actionCommand, numPlayers, maxRaise, playerWallets, trial_num):
 		# If player is agentQ, run standard find-action-that-maximizes-reward without lookahead.
 		# Player takes action according to specified actionCommand (different for each baseline!) 
 		else: 
-			actions = actionCommand(state, actions)
+			if (actionCommand != False): actions = actionCommand(state, actions)
 			max_reward = float("-inf")
 			max_state = state
 			for action in actions: 
@@ -70,19 +71,18 @@ def runBaselines(numPlayers, maxRaise, playerWallets):
 	print("RANDOM ACTION POLICY")
 	for i in range(num_trials):
 		actionCommand = getRandomAction
-		simulate(actionCommand, numPlayers, maxRaise, playerWallets, i+1)
+		simulate(actionCommand, numPlayers, maxRaise, copy.copy(playerWallets), i+1)
 
 	# MAX ACTION UNIFORM POLICY
 	print("MAX ACTION POLICY")
 	for i in range(num_trials):
 		actionCommand = getMaxBetAction
-		simulate(actionCommand, numPlayers, maxRaise, playerWallets, i+1)
+		simulate(actionCommand, numPlayers, maxRaise, copy.copy(playerWallets), i+1)
 
 	# BEST ACTION WITHOUT LOOKAHEAD 
 	print("BEST ACTION WITHOUT LOOKAHEAD")
 	for i in range(num_trials):
-		actionCommand = callmdp.getActions
-		simulate(actionCommand, numPlayers, maxRaise, playerWallets, i+1)
+		simulate(False, numPlayers, maxRaise, copy.copy(playerWallets), i+1)
 
 
 
