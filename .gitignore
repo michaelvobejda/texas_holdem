@@ -3,4 +3,5 @@ model.pyc
 baselines.pyc
 qlearn.pyc
 montecarlo.pyc
+qlearn_multipleFE.pyc
 __pycache__
