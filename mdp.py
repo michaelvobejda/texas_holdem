@@ -19,7 +19,6 @@ class PokerMDP:
 		playerHand, playerBet = state['players'][state['curPlayer']]
 
 		if not playerHand:
-			#return []
 			return [-1]
 
 		callVal = state['curBet'] - playerBet
@@ -36,30 +35,23 @@ class PokerMDP:
 	# Checks to see if a state is a terminal state. 
 	def isEnd(self, state):
 		numFolded = sum([1 if not player[0] else 0 for player in state['players']])
-		return len(state['board']) == self.boardLength or numFolded == self.numPlayers - 1
+		return len(state['board']) == self.boardLength+1 or numFolded == self.numPlayers - 1
 
 
 	def getWinner(self, state):
-
-		#SPECIAL CASE: All players fold in first round (when state['board'] == [])
-		#In this case, the last player to have bet wins. 
-		if (state['board'] == []):
-			return self.numPlayers-1
 		
 		#Return index of winner 
 		best_rank = float("inf")
-		index_of_best = None
+		index_of_best = 0
 		for i, player in enumerate(state['players']):
 			hand = player[0]
-			if (hand != False): 
+			if (hand): 
 				rank = evaluator.evaluate(hand, state['board'])
 				if (rank < best_rank): 
 					best_rank = rank
 					index_of_best = i
 		
 		return index_of_best
-		#results = [evaluator.evaluate(state['board'], player[0]) for player in state['players']]
-		#return results.index(min(results))
 
 
 	# Return reward for a given state
@@ -84,7 +76,7 @@ class PokerMDP:
 		#Unpack player state
 		playerHand, playerBet = state['players'][state['curPlayer']]
 
-		# #Check if current player has folded
+		#Check if current player has folded
 		if not playerHand:
 			return False
 
@@ -162,6 +154,6 @@ class PokerMDP:
 		self.numPlayers = numPlayers
 		self.maxRaise = maxRaise + 1
 		self.deck = Deck()
-		self.boardLength = 6
+		self.boardLength = 5
 
 		#DECLARE GLOBAL VARIABLES (HYPERPARAMETERS) HERE!
