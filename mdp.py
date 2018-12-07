@@ -45,8 +45,10 @@ class PokerMDP:
 		index_of_best = 0
 		for i, player in enumerate(state['players']):
 			hand = player[0]
-			if (hand): 
-				rank = evaluator.evaluate(hand, state['board'])
+			if (hand):
+				if len(state['board']) == 6:
+					state['board'].pop(5)
+				rank = evaluator.evaluate(state['board'], hand)
 				if (rank < best_rank): 
 					best_rank = rank
 					index_of_best = i
@@ -131,7 +133,7 @@ class PokerMDP:
 			state['curPlayer'] += 1
 			state['curPlayer'] %= self.numPlayers
 
-		return state, self.getReward(state)
+		return state, self.getReward(state, action)
 
 	#################################################################################
 	#								INITIALIZE MDP 									#
