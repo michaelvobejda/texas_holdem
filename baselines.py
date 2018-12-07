@@ -8,7 +8,7 @@ import copy
 agentQ = 0
 num_trials = 5
 
-debug = False
+debug = True
 
 #### GET_ACTIONS() METHODS #################################
 
@@ -32,7 +32,7 @@ def simulate(actionCommand, numPlayers, maxRaise, playerWallets, trial_num):
 			print('state:', state)
 			print('player wallets:', playerWallets)
 
-		if mdp.isEnd(state): 
+		if mdp.isEnd(state):
 			rewards = mdp.getRewards(state, action)
 			for i, reward in enumerate(rewards):
 				playerWallets[i] += reward

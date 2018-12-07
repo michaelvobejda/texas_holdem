@@ -11,7 +11,7 @@ evaluator = Evaluator()
 class PokerMDP:
 
 	#################################################################################
-	#								GET ACTIONS 									#
+	#								    GET ACTIONS 								#
 	#################################################################################
 
 	# Given a  state, returns all possible actions. 
@@ -72,13 +72,13 @@ class PokerMDP:
 
 		if self.isEnd(state):
 			winner = self.getWinner(state)
+			print('Winner: ', winner)
 			rewards[winner] += state['pot']
 			return rewards
 
 		if action == -1:
 			return rewards
 
-		# print('current player:', state['curPlayer'])
 		rewards[state['curPlayer']] -= action
 		return rewards
 
@@ -93,7 +93,12 @@ class PokerMDP:
 		if not playerHand:
 			return False
 
-		return playerBet == state['curBet']
+		nextPlayer = (state['curPlayer'] + 1) % self.numPlayers
+		nextPlayerHand, nextPlayerBet = state['players'][nextPlayer]
+		roundOver = nextPlayerBet == state['curBet']
+		if roundOver:
+			print('\n\n!!!!!!!!!!!!!!!Round finished!!!!!!!!!!!!!!!!!:', state)
+		return roundOver
 
 	def getStartingPlayer(self, state):
 		l = len(state['board'])
@@ -115,6 +120,7 @@ class PokerMDP:
 
 	# Generates a next state probabilistically based on current state
 	def sampleNextState(self, state, action):
+
 		#Update state based on action
 		rewards = self.getRewards(state, action)
 		if action == -1:
@@ -122,8 +128,10 @@ class PokerMDP:
 			state['players'][state['curPlayer']] = (False, state['players'][state['curPlayer']][1])
 		else:
 			#Add players action to their running total bet
-			if (state['players'][state['curPlayer']][1] == False): newPlayerBet = action   	#if current bet is False
-			else: newPlayerBet = state['players'][state['curPlayer']][1] + action
+			if (state['players'][state['curPlayer']][1] == False): 
+				newPlayerBet = action   	#if current bet is False
+			else: 
+				newPlayerBet = state['players'][state['curPlayer']][1] + action
 			state['players'][state['curPlayer']] = (state['players'][state['curPlayer']][0], newPlayerBet)
 			#Total bet for the round is equal to the player's total running bet
 			state['curBet'] = newPlayerBet
@@ -131,6 +139,7 @@ class PokerMDP:
 			state['pot'] += action
 
 		if self.roundIsOver(state):
+			
 			if len(state['board']) == 0:
 				#Flop
 				state['board'] = state['board'] + self.deck.draw(3)
@@ -141,6 +150,10 @@ class PokerMDP:
 			state['curBet'] = 0
 			#Rotate starting bet
 			state['curPlayer'] = self.getStartingPlayer(state)
+
+			# Reset player bets for all players
+			for i, player in enumerate(state['players']):
+				state['players'][i] = (state['players'][i][0], False)
 		else:
 			state['curPlayer'] += 1
 			state['curPlayer'] %= self.numPlayers
