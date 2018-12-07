@@ -1,5 +1,6 @@
 import qlearn 		#import simulateQLearning
 #import qlearn_multipleFE as qlearn
+import montecarlo
 import baselines as bs
 import copy
 from collections import defaultdict
@@ -38,13 +39,15 @@ def runGame():
     x = []
     y = defaultdict(list)
     for i in range(numGames):
-        qlearn.simulateQLearning(numPlayers, maxRaise, playerWallets)
+        # qlearn.simulateQLearning(numPlayers, maxRaise, playerWallets)
+        montecarlo.simulateMonteCarlo(numPlayers, maxRaise, playerWallets)
         if i % 10000 == 0:
     		print('Player wallets after game ' + str(i) + ': ' + str(playerWallets) + '.')
     		x.append(i)
     		for j, monies in enumerate(playerWallets):
     			y[j].append(monies)
     plotGraph(x, y)
+
 
 
 if __name__ == '__main__':
