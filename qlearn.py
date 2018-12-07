@@ -3,6 +3,7 @@
 
 from mdp import PokerMDP
 from collections import defaultdict
+from deuces import Evaluator
 
 import random
 #### DECLARE GLOBAL VARIABLES HERE #################################
@@ -14,16 +15,40 @@ weights = defaultdict(float)
 explorationProb = 0.15
 agentQ = 0
 
+evaluator = Evaluator()
 
-#### Q-LEARNING HELPER FUNCTIONS #################################
-
-# Simplify board state to just consider board hands and player hand
-def featureExtractor(state, action):
+####Q learning feature extractors###
+def standardFE(state, action):
 	if not state['players'][state['curPlayer']][0]:
-		# return (0, action)
+		return (0, action)
+	return (tuple(sorted(state['board'] + state['players'][state['curPlayer']][0])), action)
+
+def actionAgnosticFE(state, action):
+	if not state['players'][state['curPlayer']][0]:
+		return (0, )
+	return (tuple(sorted(state['board'] + state['players'][state['curPlayer']][0])), action)
+
+def binaryActionFE(state, action):
+	if action == -1:
+		a = 0
+	else:
+		a = 1
+	if not state['players'][state['curPlayer']][0]:
+		return (0, a)
+	return (tuple(sorted(state['board'] + state['players'][state['curPlayer']][0])), a)
+
+def handRankFE(state, action):
+	hand = state['players'][state['curPlayer']][0]
+	if not hand:
 		return 0
-	# return (tuple(sorted(state['board'] + state['players'][state['curPlayer']][0])), action)
-	return tuple(sorted(state['board'] + state['players'][state['curPlayer']][0]))
+	if len(state['board']) == 0:
+		return tuple(hand)
+	else:
+		return evaluator.evaluate(state['board'], hand)
+
+featureExtractor = binaryActionFE
+
+####################################
 
 
 #### Q-LEARNING MAIN FUNCTIONS #################################
@@ -70,10 +95,10 @@ def incorporateFeedback(state, action, reward, newState, actions, newState_is_en
 
 #### SIMULATE (RUN Q-LEARNING) #####################################
 
-def simulateQLearning(numPlayers, maxRaise, playerWallets): 
+def simulateQLearning(numPlayers, maxRaise, playerWallets):
 	mdp = PokerMDP(numPlayers, maxRaise)
 	state = mdp.initState()
-	actions = mdp.getActions(state)		
+	actions = mdp.getActions(state)
 	while True:
 
 		#CASE: Game Over
